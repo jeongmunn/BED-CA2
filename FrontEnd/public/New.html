@@ -1,0 +1,293 @@
+<!-- 
+Name: tan jing wen
+Class: DIT/1B/03
+Admission Number: P2037084
+-->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="Home.css" rel="stylesheet" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script>
+        function createcategory(cardInfo) {
+            console.log(cardInfo);
+            var card =
+                `
+                <option value="${cardInfo.catname}">${cardInfo.catname}</option>
+            `
+            return card;
+        }
+
+        function updatecategory() {
+            $.ajax({
+                url: 'http://localhost:8888/categories/',
+                type: 'GET',
+                dataType: 'json',
+
+                success: function (data, textStatus, xhr) {
+                    console.log("--------reponse data------------")
+                    console.log(data);
+
+                    if (data.length == 0) {
+                        console.log("No categories found.");
+                        $('#content').html("No categories found.");
+                        return;
+                    }
+
+                    for (var i = 0; i < data.length; i++) {
+                        var game = data[i];
+
+                        var cardInfo = {
+                            "catname": game.catname,
+                        }
+
+                        var newoption = createcategory(cardInfo);
+                        $('#platform').append(newoption);
+                    }
+                },
+
+                error: function (xhr, textStatus, errorThrown) {
+                    console.log('Error in Operation');
+                    console.log(xhr);
+                    console.log(textStatus);
+                    console.log(errorThrown);
+
+                    console.log(xhr.responseText);
+                    console.log(xhr.status);
+                }
+            });
+        }
+
+
+        $(document).ready(function () {
+            var userData = localStorage.getItem('userInfo');
+            var userJsonData = JSON.parse(userData);
+
+            var userid = userJsonData.userid;
+            console.log(userid);
+
+            console.log(userJsonData);
+
+            var token = localStorage.getItem('token');
+            if (userData == null) {
+                document.getElementById("Profile").style.display = "none";
+                document.getElementById("Add").style.display = "none";
+                document.getElementById("Logout").style.display = "none";
+                document.getElementById("Add").style.display = "none";
+            } else {
+                document.getElementById("Signup").style.display = "none";
+                document.getElementById("Login").style.display = "none";
+            }
+
+
+            $("#Games").click(function () {
+                window.location.assign("http://localhost:8008/Games.html");
+            })
+
+            $("#Home").click(function () {
+                window.location.assign("http://localhost:8008/Home.html");
+            })
+
+            $("#Signup").click(function () {
+                window.location.assign("http://localhost:8008/Signup.html");
+            })
+
+            $("#Login").click(function () {
+                window.location.assign("http://localhost:8008/Login.html");
+            })
+
+            $("#Logout").click(function () {
+                window.localStorage.clear();     // delete everything
+                window.location.assign("http://localhost:8008/Home.html");
+            });
+
+            $("#addgame").click(function () {
+                console.log("addgame button is clicked.")
+                // data extraction
+                var title = $('#title').val();
+                var description = $('#description').val();
+                var price = $('#price').val();
+                var year = $('#year').val();
+                var platform = $('#platform').val();
+                var category = $('#category').val();
+
+                var data = {
+                    "title": title,
+                    "description": description,
+                    "price": price,
+                    "year": year,
+                    "platform": platform,
+                    "category": category,
+                }
+                console.log(JSON.stringify(data));
+
+                $.ajax({
+                    headers: { 'authorization': 'Bearer ' + token },
+                    url: 'http://localhost:8888/newgame/' + userid,
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    success: function (data, textStatus, xhr) {
+                        if (data != null && data.success) {
+
+                            $('#msg').html('Game added successfully!');
+
+                        } else {
+                            console.log("Error");
+                        }
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        console.log('Error in Operation');
+                        console.log(xhr);
+                        console.log(textStatus);
+                        console.log(errorThrown);
+
+                        console.log(xhr.responseText);
+                        console.log(xhr.status);
+
+                        if (xhr.status == 401 || 403) {
+                            $('#msg').html('You are unauthorised.Please try again.');
+                        }
+                    }
+                });
+            });
+
+            $("#addcategory").click(function () {
+                console.log("addcategory button is clicked.")
+                // data extraction
+                var category = $('#categoryname').val();
+                var description = $('#catdescription').val();
+
+                var data = {
+                    "catname": category,
+                    "description": description,
+                }
+
+                console.log(data);
+
+                $.ajax({
+                    headers: { 'authorization': 'Bearer ' + token },
+                    url: 'http://localhost:8888/newcategory/' + userid,
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    success: function (data, textStatus, xhr) {
+                        console.log("success");
+                        if (data != null && data.success) {
+                            $('#msg').html('Category added successfully!');
+                            updatecategory();
+                            window.location.reload;
+                        } else {
+                            console.log("Error");
+                        }
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        console.log('Error in Operation');
+                        console.log(xhr);
+                        console.log(textStatus);
+                        console.log(errorThrown);
+
+                        console.log(xhr.responseText);
+                        console.log(xhr.status);
+
+                        if (xhr.status == 401 || 403) {
+                            $('#msg').html('You are unauthorised.Please try again.');
+                        } else if (xhr.status == 422) {
+                            $('msg').html("Category name has been registered.Please enter again.")
+                        }
+                    }
+                });
+            })
+        })
+    </script>
+
+</head>
+
+<body>
+    <header>
+        <nav class="navbar bg-light navbar-light navbar-expand-lg sticky-topr">
+            <div class="navbar justify-content-center">
+                <!--logo-->
+                <a class="navbar-brand justify-content-center" href="Home.html">
+                    <img src="./image/logo.png" class="logo" alt="logo">
+                </a>
+                <!--links-->
+                <div class="container justify-content-center">
+                    <a class="nav-item nav-link a" id="Home">HOME</a>
+                    <a class="nav-item nav-link a" id="Profile">PROFILE</a>
+                    <a class="nav-item nav-link a" id="Games">GAMES</a>
+                    <a class="nav-item nav-link a" id="Add">ADD</a>
+                    <button type="submit" class="btn btn-primary text" id="Login">Login</button>
+                    <button type="submit" class="btn btn-primary text" id="Signup">Sign Up</button>
+                    <button type="submit" class="btn btn-primary text" id="Logout">Logout</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div id="content" class="justify-content-center rows">
+        <div id="msg" style="margin:10px;color:blanchedalmond"></div>
+        <div class="new-game-form card">
+            <h3 class="text" style="padding-left:30px;">Add New Games</h3>
+            <input type="title" name="title" class="text-input js-input" placeholder="title" id="title" required
+                autofocus="" style="border-radius: 2px;border: none;display: inline-block;cursor: pointer;text-decoration: none !important;color: black !important;background: rgba( 103, 193, 245, 0.2 );padding-right: 393px;
+            padding-top: 14.5px;background: white;padding-bottom: 14.5px;margin:1.5em;">
+
+            <input type="description" name="description" class="text-input js-input" placeholder="description"
+                id="description" required style="border-radius: 2px;border: none;display: inline-block;cursor: pointer;text-decoration: none !important;color: black !important;background: rgba( 103, 193, 245, 0.2 );padding-right: 393px;
+                padding-top: 14.5px;background: white;padding-bottom: 14.5px;margin:1.5em;">
+
+            <input type="price" name="price" class="text-input js-input" placeholder="price" id="price" required style="border-radius: 2px;border: none;display: inline-block;cursor: pointer;text-decoration: none !important;color: black !important;background: rgba( 103, 193, 245, 0.2 );padding-right: 393px;
+            padding-top: 14.5px;background: white;padding-bottom: 14.5px;margin:1.5em;">
+
+            <input type="year" name="year" class="text-input js-input" placeholder="year" id="year" type="number"
+                min="1900" required style="border-radius: 2px;border: none;display: inline-block;cursor: pointer;text-decoration: none !important;color: black !important;background: rgba( 103, 193, 245, 0.2 );padding-right: 393px;
+                padding-top: 14.5px;background: white;padding-bottom: 14.5px;margin:1.5em;display:block;">
+
+            <select data-trigger="" name="choices-single-defaul" style="border-radius: 2px;border: none;display: inline-block;cursor: pointer;text-decoration: none !important;color: black !important;background: rgba( 103, 193, 245, 0.2 );padding-right: 393px;
+                padding-top: 14.5px;background: white;padding-bottom: 14.5px;margin:1.5em;" id="platform" required>
+                <option value=""></option>
+            </select>
+
+            <!--to be changed for category update-->
+            <select data-trigger="" name="choices-single-defaul" style="border-radius: 2px;border: none;display: inline-block;cursor: pointer;text-decoration: none !important;color: black !important;background: rgba( 103, 193, 245, 0.2 );padding-right: 393px;
+            padding-top: 14.5px;background: white;padding-bottom: 14.5px;margin:1.5em;" id="category" required>
+                <option value=""></option>
+                <option value="Action">Action</option>
+                <option value="Sport">Sport</option>
+                <option value="Mind">Mind</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <div id="addgame" class="justify-content-center" style="padding:10px 0 20px 20px">
+                <button type="submit" class="no-style-button btn text">Add Game</button>
+            </div>
+        </div>
+
+        <div class="new-category-form card">
+            <h3 class="text" style="padding-left:30px;">Add New Category</h3>
+            <input type="category" name="category" class="text-input js-input" placeholder="category" id="categoryname"
+                required style="border-radius: 2px;border: none;display: inline-block;cursor: pointer;text-decoration: none !important;color: black !important;background: rgba( 103, 193, 245, 0.2 );padding-right: 393px;
+            padding-top: 14.5px;background: white;padding-bottom: 14.5px;margin:1.5em;" />
+            <input type="description" name="description" class="text-input js-input" placeholder="description"
+                id="catdescription" required style="border-radius: 2px;border: none;display: inline-block;cursor: pointer;text-decoration: none !important;color: black !important;background: rgba( 103, 193, 245, 0.2 );padding-right: 393px;
+                    padding-top: 14.5px;background: white;padding-bottom: 14.5px;margin:1.5em;" />
+            <div id="addcategory" style="padding:10px 0 20px 20px">
+                <button type="submit" class="no-style-button btn text">Add Category</button>
+            </div>
+        </div>
+
+
+    </div>
+
+</body>
+
+</html>

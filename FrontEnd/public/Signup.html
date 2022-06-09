@@ -1,0 +1,131 @@
+<!-- 
+Name: tan jing wen
+Class: DIT/1B/03
+Admission Number: P2037084
+-->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="Login.css" rel="stylesheet" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $("#Login").click(function () {
+                window.location.assign("http://localhost:8008/Login.html");
+            });
+
+            $("#Home").click(function() {
+                window.location.assign("http://localhost:8008/Home.html");
+            });
+
+            $("#Games").click(function() {
+                window.location.assign("http://localhost:8008/Games.html");
+            });
+
+            $("#Signup").click(function () {
+                console.log("sign up button is clicked");
+                // data extraction
+                var username = $('#username').val();
+                var email = $('#email').val();
+                var type = $('#role').val();
+                var pwd = $('#pwd').val();
+                var profile_url = $('#url').val();
+
+                var data = {
+                    "username" : username,
+                    "email" : email,
+                    "type" : type,
+                    "pwd" : pwd,
+                    "profile_url" : profile_url,
+                }
+
+                console.log("data = " + JSON.stringify(data));
+
+                // call web service endpoint
+                $.ajax({  // asychronous , it wont wait                                            
+                    url: 'http://localhost:8888/api/signup',
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    contentType: "application/json; charset=utf-8",   // sending over 
+                    dataType: "json",                                 // type of data coming back in
+                    success: function (data, textStatus, xhr) {   // whatever it comes back (result in Postman) , goes into data
+                        console.log(data);
+                        if (data == null) {
+                            $('#message').html('Signed up successfully ! You can login as user now !');
+                        } else {
+                            console.log("Error");
+                        }
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        if (xhr.status == 422) {
+                            $('#message').html('Theres duplication for username or email.PLease try again');
+                            console.log("duplicate name or email");
+                        }
+                        console.log('Error in Operation');
+                    }
+                });
+                return false;
+            });
+
+        });  
+    </script>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar bg-light navbar-light navbar-expand-lg sticky-topr">
+            <div class="navbar justify-content-center">
+                <!--logo-->
+                <a class="navbar-brand" href="Home.html">
+                    <img src="./image/logo.png" class="logo" alt="logo">
+                </a>
+                <!--links-->
+                <div class="container justify-content-center">
+                    <a class="nav-item nav-link"  id="Home">HOME</a>
+                    <a class="nav-item nav-link"  id="Games">GAMES</a>
+                    <button type="submit" class="btn btn-primary text" id="Login">Login</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="login-form" id="login">
+        <form action="">
+            <h2 class="text-center">Sign Up</h2>
+            <div class="form-group">
+                <input type="text" class="form-control" id="username" placeholder="Username" required="required">
+            </div>
+            <div class="form-group">
+                <input type="email" class="form-control" id="email" placeholder="Email" required="required">
+            </div>
+            <div class="form-group">
+                <select data-trigger="" id="role"
+                style="border-radius: 2;padding:15px                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ;border: none;display: inline-block;cursor: pointer;text-decoration: none !important;" />
+                <option value="customer">Customer</option>
+                <option value="admin">Game Developer/Seller</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <input type="password" class="form-control" id="pwd" placeholder="Password" required="required">
+            </div>
+            <div class="form-group">
+                <input type="url" class="form-control" id="url" placeholder="Profile pic url" >
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary btn-block text" id="Signup">Sign up</button>
+            </div>
+
+        </form>
+    </div>
+
+    <div id="message" class="justify-content-center" style="color:blanchedalmond;margin:10px;"></div>
+
+</body>
+
+</html>

@@ -1,0 +1,14 @@
+1. Open the file using Visual Studio Code .
+2. Copy the file path from File Explorer .
+3. Open Command Prompt . 
+   "cd" - file path . 
+   "npm init" . 
+   "npm install --save express" .
+   "npm install --save body-parser" .
+   "npm install --save mysql" .
+   "npm install --save jsonwebtoken" .
+   "npm install --save cors" .
+4. Run the sql dump file using MYSQL .
+5. Run "nodemon BACKEND server.js" in Command Prompt . 
+6. Run "nodemon FRONTEND server.js" in Command Prompt . 
+7. Navigate to the correct link to load the files.

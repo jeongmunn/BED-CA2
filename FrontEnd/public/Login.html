@@ -1,0 +1,114 @@
+<!-- 
+Name: tan jing wen
+Class: DIT/1B/03
+Admission Number: P2037084
+-->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="Login.css" rel="stylesheet" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $("#Signup").click(function () {
+                window.location.assign("http://localhost:8008/Signup.html");
+            });
+
+            $("#Home").click(function() {
+                window.location.assign("http://localhost:8008/Home.html");
+            });
+
+            $("#Games").click(function() {
+                window.location.assign("http://localhost:8008/Games.html");
+            });
+
+            $("#Login").click(function () {
+                // data extraction
+                var username = $('#username').val();
+                var pwd = $('#pwd').val();
+
+                // data compilation
+                var data = "{\"username\":\"" + username + "\", \"password\":\"" + pwd + "\"}";
+                console.log(data);
+
+                // call web service endpoint
+                $.ajax({  // asychronous , it wont wait                                            
+                    url: 'http://localhost:8888/api/login',
+                    type: 'POST',
+                    data: data,
+                    contentType: "application/json; charset=utf-8",   // sending over 
+                    dataType: "json",                                 // type of data coming back in
+                    success: function (data, textStatus, xhr) {   // whatever it comes back (result in Postman) , goes into data
+                        console.log(data);
+
+                        if (data != null) {
+                            localStorage.setItem('token', data.token);  // mini storage on browser  , save token
+                            localStorage.setItem('userInfo', JSON.stringify(data.UserData));  // comes from data ^
+                            window.location.assign("http://localhost:8008/Home.html");
+                        } else {
+                            console.log("Error");
+                        }
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        if (xhr.status == 401) {
+                            $('#message').html('User does not exist. You might have key in the wrong username or password.');
+                            console.log("nup dun have this user");
+                        }
+                        console.log('Error in Operation');
+                    }
+                });
+                return false;
+            });
+
+        });  
+    </script>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar bg-light navbar-light navbar-expand-lg sticky-topr">
+            <div class="navbar justify-content-center">
+                <!--logo-->
+                <a class="navbar-brand" href="Home.html">
+                    <img src="./image/logo.png" class="logo" alt="logo">
+                </a>
+                <!--links-->
+                <div class="container justify-content-center">
+                    <a class="nav-item nav-link"  id="Home">HOME</a>
+                    <a class="nav-item nav-link"  id="Games">GAMES</a>
+                    <button type="submit" class="btn btn-primary text" id="Signup">Sign Up</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="login-form" id="login">
+        <form action="">
+            <h2 class="text-center">Log in</h2>
+            <div class="form-group">
+                <input type="text" class="form-control" id="username" placeholder="Username" required="required">
+            </div>
+            <div class="form-group">
+                <input type="password" class="form-control" id="pwd" placeholder="Password" required="required">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary btn-block text" id="Login">Log in</button>
+            </div>
+            <div class="clearfix">
+                <label class="pull-left checkbox-inline text"><input type="checkbox"> Remember me</label>
+                <a href="#" class="pull-right text">Forgot Password?</a>
+            </div>
+        </form>
+    </div>
+
+    <div id="message" class="justify-content-center" style="color:blanchedalmond;margin:10px;"></div>
+
+</body>
+
+</html>

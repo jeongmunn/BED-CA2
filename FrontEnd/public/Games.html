@@ -1,0 +1,185 @@
+<!-- 
+Name: tan jing wen
+Class: DIT/1B/03
+Admission Number: P2037084
+-->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="Home.css" rel="stylesheet" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script>
+        function createCard(cardInfo) {
+            console.log(cardInfo);
+            var card =
+                `
+                <div class="card row col-sm-3 justify-content-center" style="margin-top:1em;padding:15px;border-radius: 20px;">
+                    <div class="card-body">
+                    <img src="${cardInfo.url}" style="width:150px;height:150px;border-radius:20px;margin:10px"  />
+                    </div>
+                    <div class="card-text text-center">
+                    <h4>TITLE : ${cardInfo.title}</h4>
+                    <p>PRICE : ${cardInfo.price}</p>
+                    <p>CATEGORY : ${cardInfo.category}</p>
+                    </div>
+                    <a href="/Game.html?gameid=${cardInfo.gameid}" class="btn btn-primary">View</a>
+                </div>
+            `
+            return card;
+        }
+
+        function loadAllGames() {
+            $.ajax({
+                url: 'http://localhost:8888/games/' ,
+                type: 'GET',
+                dataType: 'json',
+
+                // codes to update UI
+                success: function (data, textStatus, xhr) {
+                    console.log("--------reponse data------------")
+                    console.log(data);
+
+                    if (data.length == 0) {
+                        console.log("No games found.");
+                        $('#content').html("No games in database.");
+                        return;
+                    }
+
+                    for (var i = 0; i < data.length; i++) {
+                        var game = data[i];
+
+                        var cardInfo = {
+                            "gameid": game.gameid,
+                            "title": game.title,
+                            "price": game.price,
+                            "category" : game.catname,
+                            "platform" : game.platform,
+                            "description" : game.description,
+                            "year" : game.year,
+                            "url": game.url,
+                        }
+
+                        var newcard = createCard(cardInfo);
+                        $('#content').append(newcard);
+                    }
+                },
+
+                error: function (xhr, textStatus, errorThrown) {
+                    console.log('Error in Operation');
+                    console.log(xhr);
+                    console.log(textStatus);
+                    console.log(errorThrown);
+
+                    console.log(xhr.responseText);
+                    console.log(xhr.status);
+                }
+            });
+        }
+
+
+        $(document).ready(function () {
+            var userData = localStorage.getItem('userInfo');
+            console.log(userData);
+            if (userData == null) {
+                document.getElementById("Profile").style.display = "none";
+                document.getElementById("Add").style.display = "none";
+                document.getElementById("Logout").style.display = "none";
+            } else {
+                document.getElementById("Signup").style.display = "none";
+                document.getElementById("Login").style.display = "none";
+            }
+
+            $("#Home").click(function () {
+                window.location.assign("http://localhost:8008/Home.html");
+            })
+
+            $("#Add").click(function () {
+                window.location.assign("http://localhost:8008/New.html");
+            })
+
+            $("#Signup").click(function () {
+                window.location.assign("http://localhost:8008/Signup.html");
+            })
+
+            $("#Login").click(function () {
+                window.location.assign("http://localhost:8008/Login.html");
+            })
+
+            $("#Search").click((event) => {
+                // prevents the page from refreshing
+                event.preventDefault();
+
+                // do a check
+                console.log("Search button is clicked");
+
+                // data extraction
+                var gametitle = $('#title').val();
+                console.log("Search game title : " + gametitle);
+
+                // data compilation
+                var redirectURL = "http://localhost:8008/Game.html?search_gametitle=" + gametitle;
+                console.log("Redirect URL " + redirectURL);
+
+                // redirect to url with query parameters
+                window.location.assign(redirectURL);
+                // check search params
+                console.log("----- Query Parameters b-----")
+                var queryParams = new URLSearchParams(window.location.search);
+                console.log("----- Query Parameters a-----");
+                console.log("Query Param (source): " + window.location.search);
+                console.log("Query Param (extracted): " + queryParams);
+                loadGame(gametitle);
+
+                return false;
+            })
+
+            $("#Show").click(function () {
+                console.log("show is clicked");
+                window.location.assign("http://localhost:8008/Game.html?gameid=" + gameid);
+            })
+
+            $("#Logout").click(function () {
+                window.localStorage.clear();     // delete everything
+                window.location.assign("http://localhost:8008/Games.html");
+            });
+
+            loadAllGames();
+        });
+    </script>
+
+</head>
+
+<body>
+    <header>
+        <nav class="navbar bg-light navbar-light navbar-expand-lg sticky-topr">
+            <div class="navbar justify-content-center">
+                <!--logo-->
+                <a class="navbar-brand justify-content-center" href="Home.html">
+                    <img src="./image/logo.png" class="logo" alt="logo">
+                </a>
+                <!--links-->
+                <div class="container justify-content-center">
+                    <a class="nav-item nav-link a"  id="Home">HOME</a>
+                    <a class="nav-item nav-link a"  id="Profile">PROFILE</a>
+                    <a class="nav-item nav-link a"  id="Games">GAMES</a>
+                    <a class="nav-item nav-link a"  id="Add">ADD</a>
+                    <button type="submit" class="btn btn-primary text" id="Login">Login</button>
+                    <button type="submit" class="btn btn-primary text" id="Signup">Sign Up</button>
+                    <button type="submit" class="btn btn-primary text" id="Logout">Logout</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div id="content" class="justify-content-center row" style="padding-left:30px;">
+    </div>
+
+</body>
+
+</html>
